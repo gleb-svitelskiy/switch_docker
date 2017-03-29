@@ -1,0 +1,4 @@
+elasticsearch/data
+elasticsearch/plugins
+postgres/data
+server/data

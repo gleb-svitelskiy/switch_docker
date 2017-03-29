@@ -1,0 +1,40 @@
+version: '3'
+services:
+  elasticsearch:
+    container_name: switchapp_elasticsearch
+    image: elasticsearch:1.7.6 # 1.7.6 in production
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+#      - ./elasticsearch/plugins:/usr/share/elasticsearch/plugins
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+  postgres:
+    build: ./postgres
+    container_name: switchapp_postgres
+    environment:
+      - POSTGRES_USER=upward
+      - POSTGRES_PASSWORD=upward
+      - POSTGRES_DB=upward
+    image: switchapp/postgres
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+  redis:
+    container_name: switchapp_redis
+    image: redis:3.2 # 2.8.12 in production
+    ports:
+      - "6379:6379"
+  server:
+    build: ./server
+    command: docker-entrypoint
+    container_name: switchapp_server
+    environment:
+      DATABASE_URL: 'postgres://upward:upward@postgres:5432/upward'
+      REDISTOGO_URL: 'redis://redis:6379'
+    image: switchapp/server
+    links:
+      - postgres
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server/data/server:/switchapp
